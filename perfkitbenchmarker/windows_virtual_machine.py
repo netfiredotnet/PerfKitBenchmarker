@@ -236,6 +236,11 @@ class BaseWindowsMixin(virtual_machine.BaseOsMixin):
 
     return stdout, stderr
 
+  def RecordAdditionalMetadata(self):
+    """After the VM has been prepared, store metadata about the VM."""
+    stdout, _ = self.RemoteCommand('(Get-WmiObject Win32_Processor).Name')
+    self.os_metadata['cpu_model'] = stdout
+
   def InstallCygwin(self, bit64=True, packages=None):
     """Downloads and installs cygwin on the Windows instance.
 
@@ -459,6 +464,7 @@ class BaseWindowsMixin(virtual_machine.BaseOsMixin):
     self.system_drive = stdout.strip()
     self.RemoteCommand('mkdir %s' % self.temp_dir)
     self.DisableGuestFirewall()
+    self.RecordAdditionalMetadata()
 
   def _Reboot(self):
     """OS-specific implementation of reboot command."""
